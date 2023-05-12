@@ -1,0 +1,13 @@
+mqtt:
+  sensor:
+    - name: radek_last_changed
+      state_topic: homeassistant/persistence/radek
+      value_template: >
+        {{ value | replace(' ', 'T') }}
+
+    - name: dagmara_last_changed
+      state_topic: homeassistant/persistence/dagmara
+      value_template: >
+        {{ value | replace(' ', 'T') }}
+
+

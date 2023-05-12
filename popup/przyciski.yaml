@@ -1,0 +1,21 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: "Przyciski"
+    content:
+      type: custom:mod-card
+      card_mod:
+        style:
+          .: |
+            :host .content {
+              width: 100%;
+            } 
+      card:
+        type: entities
+        entities:
+          - input_number.glosnosc_powiadomien    
+          - input_boolean.tryb_nocny
+          - input_boolean.przelacznik_sypialnia
+          - input_boolean.przelacznik_salon
+          - input_boolean.tgtg      

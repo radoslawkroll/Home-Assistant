@@ -1,0 +1,5 @@
+mieszkancy:
+  name: mieszkancy
+  entities:
+    - person.radek  
+    - person.dagmara

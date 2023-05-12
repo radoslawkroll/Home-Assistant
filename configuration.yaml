@@ -1,0 +1,150 @@
+homeassistant:
+  name: Kotki
+  latitude: !secret homeassistant_latitude
+  longitude: !secret homeassistant_longitude
+  elevation: !secret homeassistant_elevation
+  unit_system: metric
+  temperature_unit: C
+  time_zone: Europe/Warsaw
+  country: PL
+  language: pl
+  currency: PLN
+  packages: !include_dir_named packages
+  customize_domain:
+    automation:
+      initial_state: true
+  allowlist_external_dirs:
+    - /config
+
+default_config:
+
+frontend:
+  extra_module_url:
+    - /hacsfiles/lovelace-card-mod/card-mod.js
+  themes: !include_dir_merge_named themes
+
+template: !include sidebar.yaml
+group: !include groups.yaml
+
+lovelace:
+  mode: yaml
+  resources:
+    [ { url: /hacsfiles/apexcharts-card/apexcharts-card.js,                         type: module },
+      { url: /hacsfiles/bar-card/bar-card.js,                                       type: module },
+      { url: /hacsfiles/button-card/button-card.js,                                 type: module },
+      { url: /hacsfiles/kiosk-mode/kiosk-mode.js,                                   type: module },
+      { url: /hacsfiles/light-entity-card/light-entity-card.js,                     type: module },
+      { url: /hacsfiles/light-popup-card/light-popup-card.js,                       type: module },
+      { url: /hacsfiles/lovelace-layout-card/layout-card.js,                        type: module },
+      { url: /hacsfiles/lovelace-slider-entity-row/slider-entity-row.js,            type: module },
+      { url: /hacsfiles/swipe-card/swipe-card.js,                                   type: module },
+      { url: /hacsfiles/mini-graph-card/mini-graph-card-bundle.js,                  type: module },
+      { url: /hacsfiles/lovelace-xiaomi-vacuum-map-card/xiaomi-vacuum-map-card.js,  type: module },     
+      { url: /hacsfiles/scheduler-card/scheduler-card.js,                           type: module },  
+      { url: '/local/marked.min.js?v=4.3.0',                                        type: module },
+      { url: '/local/more-info-card.js',                                            type: module },
+      { url: '/local/vanilla-tilt.min.js?v=1.8.0',                                  type: module },
+      { url: '/local/fonts.css?v=2.1',                                              type: css    },      
+      { url: /hacsfiles/lovelace-mushroom/mushroom.js,                              type: module },       
+      { url: /hacsfiles/purifier-card/purifier-card.js,                             type: module }            
+    ]
+
+logger:
+  default: warning
+  logs:
+    homeassistant.components.websocket_api: fatal
+    homeassistant.components.camera: fatal
+    homeassistant.helpers.entity: fatal
+    custom_components.monitor_docker.helpers: fatal
+
+sensor:
+  - platform: time_date
+    display_options:
+      - time
+      - date
+
+tts:
+  - platform: google_translate
+
+ble_monitor: 
+
+light:
+  - platform: xiaomi_miio_philipslight
+    name: Schowek light
+    host: 10.10.0.248
+    token: !secret homeassistant_lightschowek
+    model: philips.light.mono1
+  - platform: xiaomi_miio_philipslight
+    name: Top light bedroom
+    host: 10.10.0.228
+    token: !secret homeassistant_lightbedrom
+    model: philips.light.mono1
+    
+fan:
+  - platform: xiaomi_miio_airpurifier
+    name: Xiaomi Air Purifier 2
+    host: 10.10.0.226
+    token: !secret homeassistant_fantoken
+    model: zhimi.airpurifier.v7
+
+plant:
+  Monstera:
+    sensors:
+      moisture: sensor.ble_moisture_c47c8d6b9d46
+      temperature: sensor.ble_temperature_c47c8d6b9d46
+      conductivity: sensor.ble_conductivity_c47c8d6b9d46
+      brightness: sensor.ble_illuminance_c47c8d6b9d46
+    min_moisture: 15 
+    max_moisture: 60
+    min_conductivity: 350
+    max_conductivity: 2000    
+    min_temperature: 12      
+    max_temperature: 32          
+    min_brightness: 800
+    max_brightness: 1500
+
+panel_iframe:
+  portainer:
+    title: "Portainer"
+    url: "http://10.10.0.208:9000/#/containers"
+    icon: mdi:docker
+    require_admin: true   
+
+  zigbee:
+    title: "Zigbee"
+    url: "http://10.10.0.208:8080"
+    icon: mdi:zigbee
+    require_admin: true   
+
+camera:
+  - platform: xiaomi_cloud_map_extractor
+    host: !secret xiaomi_vacuum_host
+    token: !secret xiaomi_vacuum_token
+    username: !secret xiaomi_cloud_username
+    password: !secret xiaomi_cloud_password
+    draw: ['all']
+    attributes:
+      - calibration_points    
+      - rooms
+    country: de
+    colors:
+      color_robo: [224,224,224]
+      color_charger: [27,117,27]
+      color_path: [30,80,113]
+      color_goto_path: [30,80,113]
+      color_map_wall_v2: [30,30,30]
+      color_obstacle: [30,30,30]
+      color_virtual_walls: [255,0,0,60]
+      color_no_go_zones_outline: [255,0,0,60]
+      color_no_go_zones: [255,0,0,28]
+      color_scan: [0,0,0,0]
+      color_map_inside: [0,0,0,0]
+      color_map_outside: [0,0,0,0]
+      color_grey_wall: [0,0,0,0]
+      color_map_wall: [0,0,0,0]
+      color_zones_outline: [0,0,0,0]
+      color_zones: [0,0,0,0] 
+      color_room_names: [255,255,255]    
+    sizes:
+      charger_radius: 7
+      vacuum_radius: 7

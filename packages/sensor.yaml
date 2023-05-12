@@ -1,0 +1,178 @@
+sensor: 
+  - platform: template
+    sensors:
+      salon_glosnik_voluma:
+        friendly_name: "Poziom głośności głośnika w salonie"
+        value_template: >-
+            {% if is_state('media_player.salon', 'off') %}
+              0
+            {% else %}
+              {{ (state_attr('media_player.salon', 'volume_level') * 100 ) | int }} 
+            {% endif %}    
+            
+  - platform: systemmonitor
+    resources:
+      - type: disk_use_percent
+        arg: /
+      - type: memory_use_percent
+      - type: processor_use
+      - type: last_boot    
+     
+  - platform: file
+    name: karta_miejska
+    file_path: /config/www/output.txt    
+    value_template: '{{ value | replace(".", "-") }}' 
+
+  - platform: file
+    name: opady
+    file_path: /config/www/opad.txt    
+   
+  - platform: template
+    sensors:
+      airpurifier_aqi:
+        friendly_name: Air Purifier jakość powietrza
+        value_template: '{{ states.fan.xiaomi_air_purifier_2.attributes.aqi }}'
+        icon_template: mdi:weather-windy
+      airpurifier_temperature:
+        friendly_name: Air Purifier temperatura
+        value_template: '{{ states.fan.xiaomi_air_purifier_2.attributes.temperature }}'
+        unit_of_measurement: '°C'
+      airpurifier_humidity:
+        friendly_name: Air Purifier wilgotność
+        value_template: '{{ states.fan.xiaomi_air_purifier_2.attributes.humidity }}'
+        unit_of_measurement: '%'
+        icon_template: mdi:water-percent
+
+  - platform: template
+    sensors:
+      pogodajutropl:
+        friendly_name: 'pogodajutropl'
+        value_template: >-
+            {% if state_attr('weather.pogoda', 'forecast')[1].condition  == 'cloudy' %}
+              pochmurnie
+            {% elif state_attr('weather.pogoda', 'forecast')[1].condition  == 'rainy' %}
+              deszcz 
+            {% elif state_attr('weather.pogoda', 'forecast')[1].condition  == 'sunny' %}
+              słonecznie
+            {% elif state_attr('weather.pogoda', 'forecast')[1].condition  == 'snowy' %}
+            śnieżnie
+            {% elif state_attr('weather.pogoda', 'forecast')[1].condition  == 'snowy-rain' %}
+              deszcz z śnmiegiem 
+            {% elif state_attr('weather.pogoda', 'forecast')[1].condition  == 'partlycloudy' %}
+              częściowo pochmurnie            
+            {% else %}
+            {{state_attr('weather.pogoda', 'forecast')[1].condition }}
+            {% endif %}  
+
+  - platform: template
+    sensors:
+      pralka_last_run_date:
+        friendly_name: "Ostatnie uruchomienie pralki"
+        device_class: timestamp
+        value_template: "{{ state_attr('automation.pralka_skonczyla_pranie', 'last_triggered') }}"
+        
+  - platform: template
+    sensors:
+      last_run_date_pralka:
+        friendly_name: "Ile dni temu praka została uruchomiona"
+        value_template: >-
+          {% if  (as_timestamp(now()) - as_timestamp(states.sensor.pralka_last_run_date.state) ) | timestamp_custom("%j")| int < 2 %}
+          {{  (as_timestamp(now()) - as_timestamp(states.sensor.pralka_last_run_date.state) ) | timestamp_custom("%j")| int }} dzień temu
+          {%- else -%}
+          {{ (as_timestamp(now()) - as_timestamp(states.sensor.pralka_last_run_date.state) ) | timestamp_custom("%j")| int }} dni temu
+          {%- endif %}
+
+  - platform: template
+    sensors:
+      zuzycie_energii_pralka:
+        friendly_name: "Zużycie energii"
+        value_template: "{{ (((states.sensor.pralka_energy_total.state | float * 0.75))   | round(2)) }} zł"
+
+  - platform: template
+    sensors:
+      karta_miejska_data:
+        friendly_name: "Ile dni zostało na karcie miejskiej"
+        value_template: >- 
+          {{ (as_timestamp(states.sensor.karta_miejska.state) - as_timestamp(states.sensor.date.state) ) | timestamp_custom("%j") | int }}
+
+  - platform: template
+    sensors:
+      hacs_updates:
+        friendly_name: "hacs updates"
+        value_template: >- 
+          {{ states.update | selectattr("state", "eq", "on") | list | count }}
+
+  - platform: pirateweather
+    api_key: !secret homeassistant_pirateweather
+    scan_interval: '00:15:00'
+    monitored_conditions:
+      - temperature
+      - precip_probability
+      - precip_type
+      - humidity
+      - cloud_cover
+      - nearest_storm_distance
+      - precip_intensity
+      - wind_speed    
+
+  - platform: tgtg
+    # Optional: email so you know which account is used
+    email: !secret tgtg_email
+
+    # Mandatory: tokens for authentication - see the tgtg_get_tokens.py script
+    access_token: !secret tgtg_acces 
+    refresh_token: !secret tgtg_refresh 
+    user_id: !secret tgtg_user 
+    cookie: !secret tgtg_cookie 
+
+    # Optional: Refresh the stock every 15 minutes
+    scan_interval: 900
+
+  - platform: rest
+    scan_interval: 900
+    name: Airly
+    resource: !secret homeassistant_airly_resource
+    value_template: "{{ value_json['current']['values'][0]['value'] }} {{ value_json['current']['values'][1]['value'] }} {{ value_json['current']['values'][2]['value'] }} {{ value_json['current']['values'][3]['value'] }} {{ value_json['current']['values'][4]['value'] }} {{ value_json['current']['values'][5]['value'] }} {{ value_json['current']['indexes'][0]['level'] }} {{ value_json['current']['indexes'][0]['value'] }} {{ value_json['current']['indexes'][0]['description'] }}"
+    headers:
+      apikey: !secret homeassistant_airly
+      Accept-Language: pl 
+        
+  - platform: template
+    sensors:
+      airly_pm25:
+        friendly_name: "Pył PM25"
+        icon_template: mdi:jquery
+        unit_of_measurement: "μg/m3"
+        value_template: "{{ states.sensor.airly.state.split(' ')[1] }}"
+
+      airly_quality:
+        friendly_name: "Jakość powietrza"
+        icon_template: mdi:quicktime
+        value_template: "{{ states.sensor.airly.state.split(' ')[6] }}"
+      airly_level:
+        friendly_name: "Poziom"
+        icon_template: mdi:database
+        value_template: "{{ states.sensor.airly.state.split(' ')[7] | float | round(0) }}"
+      airly_description:
+        friendly_name: "Komunikat"
+        icon_template: mdi:alert
+        value_template: "{{ states.sensor.airly.state.split(' ')[8:] | join(' ') }}"    
+        
+  - platform: template
+    sensors:
+      jakosc:
+        friendly_name: "jakosc"
+        value_template: >-
+          {% if is_state('sensor.airly_quality', 'VERY_LOW') %}
+                bardzo niska
+          {% elif is_state('sensor.airly_quality', 'LOW') %}
+                niska
+          {% elif is_state('sensor.airly_quality', 'MEDIUM') %}
+                średnia
+          {% elif is_state('sensor.airly_quality', 'HIGH') %}
+                wysoka          
+          {% elif is_state('sensor.airly_quality', 'VERY_HIGHT') %}
+                bardzo wysoka 
+          {% elif is_state('sensor.airly_quality', 'EXTREME') %}
+                ekstremalnie wysoka
+          {% endif %}        

@@ -1,0 +1,723 @@
+automation:
+
+    ####################################################
+    #                                                  #
+    #                    ŁAZIENKA                      #
+    #                                                  #
+    ####################################################
+
+  - alias: Wyciek wody w łazience
+    description: ""
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.0x00158d000805cb33_water_leak
+        from: "off"
+        to: "on"
+    condition: []
+    action:
+      - service: tts.cloud_say
+        data:
+          entity_id: media_player.salon
+          message: Wykryto wyciek wody w łazience!
+      - service: notify.mobile_app_mi_note_10_pro
+        data:
+          message: Wykryto wyciek wdoy w łazience
+      - service: notify.mobile_app_redmi_note_8_pro
+        data:
+          message: Wykryto wyciek wody w łazience
+
+  - alias: Włącz światło łazienka
+    description: ''
+    mode: single
+    trigger:
+      - platform: mqtt
+        topic: zigbee2mqtt/Wlacznik lazienka/action
+        payload: "on"
+    condition: []
+    action:
+      - service: light.turn_on
+        data: {}
+        target:
+          entity_id: light.group_lazienka
+
+  - alias: Wyłącz światło łazienka
+    description: ""
+    mode: single
+    trigger:
+      - platform: mqtt
+        topic: zigbee2mqtt/Wlacznik lazienka/action
+        payload: "off"
+    condition: []
+    action:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.group_lazienka
+
+
+  - alias: Pralka off na on
+    description: ''
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - switch.pralka
+        to: 'off'
+    condition: []
+    action:
+      - type: turn_on
+        device_id: d952c8b111a851537b15696a27e95926
+        entity_id: switch.pralka
+        domain: switch
+          
+  - alias: Pralka skończyła pranie
+    description: ''
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - binary_sensor.pralka
+        to: 'off'
+        from: 'on'
+        for:
+          hours: 0
+          minutes: 1
+          seconds: 0
+    condition: []
+    action:
+      - service: tts.cloud_say
+        data:
+          entity_id: media_player.salon
+          message: Pralka skończyła pranie.
+
+    ####################################################
+    #                                                  #
+    #                  PRZEDPOKÓJ                      #
+    #                                                  #
+    ####################################################       
+
+  - alias: Włącz światło przedpokój
+    description: ''
+    mode: single
+    trigger:
+      - platform: mqtt
+        topic: zigbee2mqtt/Wlacznik przedpokoj/action
+        payload: "on"
+    condition: []
+    action:
+      - type: turn_on
+        device_id: adec9e72032555f45f8337c4f251e229
+        entity_id: light.0x00158d00052cda87
+        domain: light
+    
+  - alias: Wyłącz światło przedpokój
+    description: ''
+    mode: single
+    trigger:
+      - platform: mqtt
+        topic: zigbee2mqtt/Wlacznik przedpokoj/action
+        payload: "off"
+    condition: []
+    action:
+      - type: turn_off
+        device_id: adec9e72032555f45f8337c4f251e229
+        entity_id: light.0x00158d00052cda87
+        domain: light    
+
+  - alias: Zapal światło na przedpokoju
+    description: ''
+    mode: single
+    trigger:
+      - type: opened
+        platform: device
+        device_id: 819c03d6af494306f08a49df7abb9161
+        entity_id: binary_sensor.0x00158d000310cf5d_contact
+        domain: binary_sensor
+    condition:
+      - condition: state
+        entity_id: input_boolean.tryb_nocny
+        state: "off"
+      - condition: state
+        entity_id: sun.sun
+        state: below_horizon
+    action:
+      - type: turn_on
+        device_id: 4e7cf3196cc205c01d938668175de2a1
+        entity_id: light.0x00158d00052cda87
+        domain: light
+      - delay:
+          hours: 0
+          minutes: 2
+          seconds: 0
+          milliseconds: 0
+      - type: turn_off
+        device_id: 4e7cf3196cc205c01d938668175de2a1
+        entity_id: light.0x00158d00052cda87
+        domain: light
+
+  - alias: Zawsze jasnośc 100%
+    description: ""
+    mode: single
+    trigger:
+      - platform: device
+        type: turned_on
+        device_id: b16f3809ef55ed901085b610b7aed3af
+        entity_id: light.0x00158d00052cda87
+        domain: light
+    condition: []
+    action:
+      - data:
+          brightness_pct: 100
+        service: light.turn_on
+        target:
+          entity_id: light.0x00158d00052cda87
+
+
+    ####################################################
+    #                                                  #
+    #                       SALON                      #
+    #                                                  #
+    ####################################################   
+
+  - alias: Automatyzacja światła w salonie
+    description: ''
+    use_blueprint:
+      path: networkingcat/yet_another_motion_automation.yaml
+      input:
+        motion_entity: binary_sensor.0x00158d0002d7ca2c_occupancy
+        no_motion_blocker: input_boolean.przelacznik_salon
+        no_motion_wait: 210
+        elevation_check: 2
+        light_target:
+          entity_id: light.0x00158d0005432a06
+          
+  - alias: Zawsze jasnośc 100% salon
+    description: ""
+    mode: single
+    trigger:
+      - platform: device
+        type: turned_on
+        device_id: b83589b7e30e93088f27123eb78a648d
+        entity_id: light.0x00158d0005432a06
+        domain: light
+    condition: []
+    action:
+      - data:
+          brightness_pct: 100
+        service: light.turn_on
+        target:
+          entity_id: light.0x00158d0005432a06
+
+    ####################################################
+    #                                                  #
+    #                     KUCHNIA                      #
+    #                                                  #
+    ####################################################   
+
+  - alias: Automatyzacja światła w kuchni
+    description: ''
+    use_blueprint:
+      path: networkingcat/yet_another_motion_automation.yaml
+      input:
+        motion_entity: binary_sensor.0x00158d0005468c6e_occupancy
+        no_motion_wait: 120
+        elevation_check: 6
+        light_target:
+          entity_id: light.group_kuchnia 
+
+  - alias: Przełącznik kuchnia. Włącz światło
+    description: ""
+    mode: single
+    trigger:
+      - platform: device
+        domain: mqtt
+        device_id: 9c6ea8c3025e40e6c070e71b8bddc536
+        type: action
+        subtype: "on"
+        discovery_id: 0x0c4314fffe4bf5bf action_on
+    condition: []
+    action:
+      - service: light.turn_on
+        data: {}
+        target:
+          entity_id: light.group_kuchnia
+
+  - alias: Przełącznik kuchnia. Wyłącz światło
+    description: ""
+    mode: single
+    trigger:
+      - platform: device
+        domain: mqtt
+        device_id: 9c6ea8c3025e40e6c070e71b8bddc536
+        type: action
+        subtype: "on"
+        discovery_id: 0x0c4314fffe4bf5bf action_on
+    condition:
+      - condition: state
+        entity_id: light.group_kuchnia
+        state: "on"
+    action:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.group_kuchnia
+
+
+
+    ####################################################
+    #                                                  #
+    #                   SYPIALNIA                      #
+    #                                                  #
+    ####################################################   
+
+  - alias: Automatyzacja światła w sypialni
+    description: ''
+    use_blueprint:
+      path: networkingcat/yet_another_motion_automation.yaml
+      input:
+        automation_blocker: input_boolean.tryb_nocny
+        no_motion_blocker: input_boolean.przelacznik_sypialnia
+        motion_entity: binary_sensor.sypialnia_ruch
+        no_motion_wait: 120
+        elevation_check: 2
+        light_target:
+          entity_id: light.top_light_bedroom
+
+    ####################################################
+    #                                                  #
+    #                PRZEŁĄCZNIKI                      #
+    #                                                  #
+    ####################################################  
+
+  - alias: Włącz input boolean salon
+    description: ''
+    mode: single
+    trigger:
+      - platform: device
+        domain: mqtt
+        device_id: cb7cad6edf637f235d48407c328664ff
+        type: click
+        subtype: single
+        discovery_id: 0x00158d000309cab5 click_single
+    condition: []
+    action:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.przelacznik_salon
+          
+  - alias: Wyłącz input boolean salon
+    description: ''
+    mode: single
+    trigger:
+      - platform: device
+        domain: mqtt
+        device_id: cb7cad6edf637f235d48407c328664ff
+        type: click
+        subtype: single
+        discovery_id: 0x00158d000309cab5 click_double
+    condition: []
+    action:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.przelacznik_salon          
+
+  - alias: Włącz input boolean sypialnia
+    description: ''
+    mode: single
+    trigger:
+      - platform: device
+        domain: mqtt
+        device_id: 5bc8ca41bcee0c386347c7c581cb3f8a
+        type: click
+        subtype: single
+        discovery_id: 0x00158d00033e8a07 click_single
+    condition: []
+    action:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.przelacznik_sypialnia
+
+  - alias: Wyłącz input boolean sypialnia
+    description: ''
+    mode: single
+    trigger:
+      - platform: device
+        domain: mqtt
+        device_id: 5bc8ca41bcee0c386347c7c581cb3f8a
+        type: click
+        subtype: single
+        discovery_id: 0x00158d00033e8a07 click_double
+    condition: []
+    action:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.przelacznik_sypialnia          
+
+    ####################################################
+    #                                                  #
+    #                     SCHOWEK                      #
+    #                                                  #
+    ####################################################   
+        
+  - alias: Włącz światło schowek
+    description: ''
+    mode: single
+    trigger:
+      - type: opened
+        platform: device
+        device_id: c70c478375b27b92e2be959686891664
+        entity_id: binary_sensor.0x00158d000310ce32_contact
+        domain: binary_sensor
+    condition: []
+    action:
+      - service: light.turn_on
+        data: {}
+        target:
+          entity_id: light.schowek_light
+
+  - alias: Wyłącz światło schowek
+    description: ''
+    mode: single
+    trigger:
+      - type: not_opened
+        platform: device
+        device_id: c70c478375b27b92e2be959686891664
+        entity_id: binary_sensor.0x00158d000310ce32_contact
+        domain: binary_sensor
+    condition: []
+    action:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.schowek_light    
+
+    ####################################################
+    #                                                  #
+    #                  TRYB NOCNY                      #
+    #                                                  #
+    ####################################################  
+
+  - alias: Tryb nocny 
+    description: ''
+    mode: single
+    trigger:
+      - platform: device
+        domain: mqtt
+        device_id: 5bc8ca41bcee0c386347c7c581cb3f8a
+        type: click
+        subtype: long_release
+        discovery_id: 0x00158d00033e8a07 click_long_release
+    condition: []
+    action:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.grupa_nocny    
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.tryb_nocny
+      - service: automation.turn_off
+        data: {}
+        target:
+          entity_id: automation.automatyzacja_swiatla_w_sypialni      
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.top_light_bedroom          
+      - type: turn_on
+        device_id: 468394dbd440fc73123d99abfc1a584f
+        entity_id: light.yeelight_desklamp_0x62433ed
+        domain: light
+        brightness_pct: 20
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 5
+          milliseconds: 0    
+      - service: media_player.volume_set
+        data:
+          volume_level: "{{ states('input_number.glosnosc_powiadomien') | float }}"
+        target:
+          entity_id: media_player.salon          
+      - service: tts.cloud_say
+        data:
+          entity_id: media_player.salon
+          message: >-
+            Włączono tryb nocny. Temperatura na zewnątrz wynosi {{    
+            states('sensor.ble_temperature_a4c138d66f06') | round(0) }} stopni
+            celcjusza, natomiast ilość zanieczyszczeń w Twojej okolicy jest
+            {{states('sensor.jakosc')}}.
+            {% if ((((states('sensor.airly_pm25') | round(0)) * 100 ) / 15) | round(0)) > 140 %}
+            Norma dobowa PM dwa i pół została przekroczona o {{  (((states('sensor.airly_pm25') | round(0)) * 100 ) / 15) | round(0)  }}%
+            {% else %}
+            {% endif %}
+            Przewidywana pogoda na jutro to     
+            {{states('sensor.pogodajutropl')}}, a temperatura wskaże od {{state_attr('weather.pogoda', 'forecast')[1].templow | round(0) }}   do {{state_attr('weather.pogoda', 'forecast')[1].temperature | round(0) }}   stopni celcjusza.
+            {% if is_state('binary_sensor.burze_dzis_net_wind_warning', 'on') %}
+            Aktualne Ostrzeżenie o wietrze {{ state_attr('binary_sensor.burze_dzis_net_wind_warning', 'level') }} stopnia. Wiatr {{ state_attr('binary_sensor.burze_dzis_net_wind_warning', 'description') }}
+            {% else %}           
+            {% endif %}
+            {% if is_state('binary_sensor.burze_dzis_net_precipitation_warning', 'on') %}
+            Aktualne Ostrzeżenie o opadach {{ state_attr('binary_sensor.burze_dzis_net_precipitation_warning', 'level') }} stopnia.
+            {% else %}           
+            {% endif %}
+            {% if is_state('binary_sensor.burze_dzis_net_frost_warning', 'on') %}
+            Aktualne Ostrzeżenie o mrozie {{ state_attr('binary_sensor.burze_dzis_net_frost_warning', 'level') }} stopnia. Mróz {{ state_attr('binary_sensor.burze_dzis_net_frost_warning', 'description') }} 
+            {% else %}           
+            {% endif %}
+            {% if is_state('binary_sensor.burze_dzis_net_heat_warning', 'on') %}
+            Aktualne Ostrzeżenie o upale {{ state_attr('binary_sensor.burze_dzis_net_heat_warning', 'level') }} stopnia. Upał {{ state_attr('binary_sensor.burze_dzis_net_heat_warning', 'description') }} 
+            {% else %}           
+            {% endif %}
+            {% if is_state('binary_sensor.burze_dzis_net_storm_warning', 'on') %}
+            Aktualne Ostrzeżenie o burzy {{ state_attr('binary_sensor.burze_dzis_net_storm_warning', 'level') }} stopnia.
+            {% else %}           
+            {% endif %}
+            Dobranoc {{ [
+            "Pchły na noc.",
+            "Karaluchy pod poduchy, a szczypawki do zabawki.",
+            "Nietoperze za kołnierze, a biedronki do skarbonki.",
+            "Ślimaki w kozaki.",
+            "Krety do skarpety.",
+            "Mrówki do kryjówki.",
+            "Szczury do rury."
+            ] | random }} 
+      - delay:
+          hours: 0
+          minutes: 3
+          seconds: 0
+          milliseconds: 0
+      - type: turn_off
+        device_id: 468394dbd440fc73123d99abfc1a584f
+        entity_id: light.yeelight_desklamp_0x62433ed
+        domain: light
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id:
+            - input_boolean.przelacznik_sypialnia
+            - input_boolean.przelacznik_salon
+
+  - alias: Włączenie automatyzacji i przełącznika boolean
+    description: ''
+    mode: single
+    trigger:
+      - platform: time
+        at: '09:00:00'
+    condition: []
+    action:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.tryb_nocny
+      - service: automation.turn_on
+        data: {}
+        target:
+          entity_id: automation.automatyzacja_swiatla_w_sypialni          
+
+  - alias: Ręczny tryb nocny
+    description: ''
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - input_boolean.tryb_nocny
+        from: 'off'
+        to: 'on'
+    condition: []
+    action:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.top_light_bedroom   
+      - type: turn_on
+        device_id: 940eaa52fc33faf004de4ca7f184ce60
+        entity_id: light.yeelight_desklamp_0x62433ed
+        domain: light
+        brightness_pct: 20
+      - service: automation.turn_off
+        data: {}
+        target:
+          entity_id: automation.automatyzacja_swiatla_w_sypialni
+      - delay:
+          hours: 0
+          minutes: 5
+          seconds: 0
+          milliseconds: 0
+      - type: turn_off
+        device_id: 940eaa52fc33faf004de4ca7f184ce60
+        entity_id: light.yeelight_desklamp_0x62433ed
+        domain: light
+
+    ####################################################
+    #                                                  #
+    #                        INNE                      #
+    #                                                  #
+    #################################################### 
+
+  - alias: Wyłącz światła i media gdy nie ma nas w domu
+    description: ''
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - group.mieszkancy
+        from: home
+        to: not_home
+    condition: []
+    action:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: all
+      - service: media_player.turn_off
+        data: {}
+        target:
+          entity_id: all
+          
+  - alias: uzytkownicy_home
+    mode: parallel
+    trigger:
+      platform: state
+      entity_id:
+        - person.radek
+        - person.dagmara
+      from:
+        - home
+        - not_home
+      to:
+        - home
+        - not_home
+    action:
+      service: mqtt.publish
+      data:
+        topic_template: >
+          homeassistant/persistence/{{ trigger.to_state.name | lower }}
+        payload_template: >
+          {{ now() }}
+        retain: true
+
+    ####################################################
+    #                                                  #
+    #                    KOMUNIKACJA                   #
+    #                                                  #
+    #################################################### 
+
+  - alias: Powiadomienie o bilecie Radka
+    description: ""
+    mode: single
+    trigger:
+      - platform: time
+        at: "18:00:00"
+    condition:
+      - condition: template
+        value_template: "{{states('sensor.karta_miejska_data') | int <= 5}}"
+    action:
+      - service: notify.mobile_app_redmi_note_8_pro
+        data:
+          message: >-
+            Radek twoja karta miejska wygaśnie za {{states.sensor.karta_miejska_data.state}} dni!. Doładuj mnie.
+          data:
+            actions:
+              - action: URI
+                title: Kup bilet
+                uri: https://jestemzgdanska.pl/n-login.qbpage
+
+  - alias: TooGoodToGo Notification
+    description: "Sends a notification when a toogoodtogo offer becomes available"
+    trigger:
+      - platform: state
+        entity_id:
+          >- # This is your list of toogoodoto sensors which are generated (Copy paste the list from above)
+          sensor.tgtg_bimbeer_sklep_brzezno,sensor.tgtg_mamy_wypieki,sensor.tgtg_capuccino_cafe_sopot_slodka_paczka,sensor.tgtg_sopocki_mlyn_paczka_z_jedzeniem
+    condition:
+      - condition: template
+        value_template: "{{ trigger.to_state.state | int > 0 }}"
+      - condition: state
+        entity_id: input_boolean.tgtg
+        state: "on"
+    action:
+      - service: notify.mobile_app_redmi_note_8_pro
+        data:
+          message: >-
+            Pojawiła się nowa paczka z {{trigger.to_state.attributes.friendly_name}} w ilości {{trigger.to_state.state}} sztuk.
+
+    ####################################################
+    #                                                  #
+    #                    DYFUZOR                       #
+    #                                                  #
+    #################################################### 
+
+  - alias: wylacz dyfuzor po 15 min
+    mode: single
+    trigger:
+      - platform: state
+        entity_id:
+          - switch.rituals_perfume_genie_lot119_06_df2d0_14551
+        to: "on"
+        for:
+          hours: 0
+          minutes: 15
+          seconds: 0
+    condition: []
+    action:
+      - service: switch.turn_off
+        data: {}
+        target:
+          entity_id: switch.rituals_perfume_genie_lot119_06_df2d0_14551
+
+  - alias: Dyfuzor Radek i Daga
+    trigger:
+      - platform: zone
+        entity_id: person.radek
+        zone: zone.home
+        event: enter
+      - platform: zone
+        entity_id: person.dagmara
+        zone: zone.home
+        event: enter
+    action:
+      - service: switch.turn_on
+        entity_id: switch.rituals_perfume_genie_lot119_06_df2d0_14551
+
+    ####################################################
+    #                                                  #
+    #                  ODKURZACZ                       #
+    #                                                  #
+    #################################################### 
+
+  - alias: Odkurzacz
+    description: ''
+    mode: single
+    trigger:
+      - platform: zone
+        entity_id: person.dagmara
+        zone: zone.uczelnia
+        event: enter
+      - platform: zone
+        entity_id: person.radek
+        zone: zone.praca
+        event: enter      
+    condition:
+      - condition: time
+        weekday:
+          - mon
+          - wed
+          - fri
+      - condition: template
+        value_template: >-
+          {{ ((as_timestamp(states.sensor.date.state) -
+          as_timestamp(states.sensor.dreame_cleaning_history.state) ) |
+          timestamp_custom("%j") | int - 1) > 0 }}
+    action:
+      - service: vacuum.start
+        data: {}
+        target:
+          entity_id: vacuum.dreame

@@ -1,0 +1,33 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: "Oczyszczacz"
+    content:
+      type: custom:mod-card
+      card_mod:
+        style:
+          .: |
+            :host .content {
+              width: 100%;
+            } 
+      card:
+        type: custom:purifier-card
+        entity: fan.xiaomi_air_purifier_2
+        compact_view: false
+        show_state: true
+        show_toolbar: true
+        stats:
+          - attribute: filter_life_remaining
+            unit: '%'
+            subtitle: Zużycie filtra
+          - attribute: motor_speed
+            unit: RPM
+            subtitle: Motor Speed
+        shortcuts:
+          - name: Silent
+            icon: mdi:weather-night
+            preset_mode: Silent
+          - name: Auto
+            icon: mdi:brightness-auto
+            preset_mode: Auto

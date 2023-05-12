@@ -1,0 +1,29 @@
+light:
+  - platform: group
+    name: group_salon
+    entities:
+      - light.yeelight_color4_0x124cb64e
+      - light.yeelight_color4_0x124d93b3
+      
+  - platform: group
+    name: group_lazienka
+    entities:
+      - light.0x04cd15fffe733961
+      - light.0x8cf681fffe1bca48
+
+  - platform: group
+    name: group_kuchnia
+    entities:
+      - light.0x842e14fffe7cb584
+      - light.0xbc33acfffe7c2faf
+
+  - platform: group
+    name: grupa_nocny
+    entities:
+      - light.yeelight_color4_0x124cb64e
+      - light.yeelight_color4_0x124d93b3
+      - light.0x00158d00052cda87
+      - light.0x00158d0005432a06
+      - light.0x842e14fffe7cb584
+      - light.0xbc33acfffe7c2faf
+      - light.top_light_bedroom

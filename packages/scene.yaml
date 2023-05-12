@@ -1,0 +1,12 @@
+scene:
+  - name: Tryb dzienny sypialnia
+    entities:
+      light.yeelight_desklamp_0x62433ed:
+        state: "on"
+        brightness: 255
+
+  - name: Tryb dzienny salon
+    entities:
+      light.0x00158d0005432a06:
+        state: "on"
+        brightness: 255        

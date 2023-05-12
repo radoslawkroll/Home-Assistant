@@ -1,0 +1,28 @@
+homeassistant:
+
+    ####################################################
+    #                                                  #
+    #                    CUSTOMIZE                     #
+    #                                                  #
+    ####################################################
+
+  customize_domain:
+    automation:
+      initial_state: true
+
+  customize:
+    #input
+    input_boolean.tryb_nocny:
+      friendly_name: Tryb nocny
+      icon: mdi:weather-night
+    
+    input_boolean.przelacznik_sypialnia:
+      friendly_name: Przełącznik sypialnia
+        
+    input_boolean.przelacznik_salon:
+      friendly_name: Przełącznik salon
+      icon: mdi:room-service     
+      
+    input_number.glosnosc_powiadomien:     
+      friendly_name: Głośność powiadomień
+      icon: mdi:volume-high       

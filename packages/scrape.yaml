@@ -1,0 +1,6 @@
+scrape:
+  - resource: https://www.msn.com/pl-pl/pogoda/prognoza/in-Gda%C5%84sk,PM?loc=eyJsIjoiR2RhxYRzayIsInIiOiJQTSIsInIyIjoiR2RhxYRzayIsImMiOiJQb2xza2EiLCJpIjoiUEwiLCJnIjoicGwtcGwiLCJ4IjoiMTguNjMiLCJ5IjoiNTQuMzMifQ%3D%3D          
+    sensor:
+      - name: pogoda_komunikat
+        select: "#CurrentWeatherSummary > p"  
+

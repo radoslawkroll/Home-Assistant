@@ -1,0 +1,16 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: "Monstera"
+    content:
+      type: custom:mod-card
+      card_mod:
+        style:
+          .: |
+            :host .content {
+              width: 100%;
+            } 
+      card:
+        type: plant-status
+        entity: plant.monstera

@@ -1,0 +1,145 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: "Home Assistant"
+    content:
+      type: custom:mod-card
+      card_mod:
+        style:
+          .: |
+            :host .main-title {
+              pointer-events: none;
+            }
+          layout-card:
+            $grid-layout$:
+              hui-entities-card:
+                $: |
+                  .card-content {
+                    padding: 1.5em 2.2em 2.3em 2em;
+                  }
+                  ha-card {
+                    animation: border 1s forwards;
+                    border-radius: 0;
+                  }
+                  /* phone */
+                  @media screen and (max-width: 800px) {
+                    ha-card {
+                      animation: none;
+                    }
+                  }
+                $hui-horizontal-stack-card$: |
+                  #root {
+                    justify-content: space-evenly;
+                    margin-top: 1.9em;
+                    margin-left: 0.8em;
+                  }
+      card:
+        type: custom:layout-card
+        layout_type: custom:grid-layout
+        layout:
+          grid-template-rows: 1fr
+          grid-template-areas: |
+            "hass"
+          mediaquery:
+            #phone
+            "(max-width: 800px)":
+              grid-template-columns: 1fr
+              grid-template-rows: repeat(1, 1fr)
+              grid-template-areas: |
+                "hass"
+
+        cards:
+
+          #################################################
+          #                                               #
+          #                HOME ASSISTANT                 #
+          #                                               #
+          #################################################
+
+          - type: entities
+            view_layout:
+              grid-area: hass
+            title: Home Assistant
+            show_header_toggle: false
+            card_mod:
+              class: header
+              style: |
+                ha-card {
+                  margin: 0px !important;
+                }
+                
+            entities:
+              - entity: sensor.current_version
+                name: Zainstalowano
+                icon: mdi:home-assistant
+
+              - entity: sensor.docker_hub
+                name: Ostatnia
+
+              - entity: sensor.docker_hub_beta
+                name: Beta
+
+              - entity: sensor.home_assistant_v2_db_size
+                name: Database
+                icon: mdi:database
+
+              - entity: sensor.home_assistant_log_size
+                name: Log file
+
+              - entity: sensor.uptime
+                name: Ostatni restart
+
+              - type: custom:bar-card
+                width: 55%
+                height: 2em
+                decimal: 0
+                unit_of_measurement: '%'
+                positions: &bar_card_positions
+                  icon: outside
+                  indicator: 'off'
+                  name: outside
+                severity: &bar_card_severity
+                  - color: '#303435'
+                    from: 0
+                    to: 89
+                  - color: '#6d2525'
+                    from: 90
+                    to: 200
+                entity_row: true
+                entities:
+
+                  - entity: sensor.processor_use
+                    name: Procesor
+                    tap_action:
+                      action: call-service
+                      service: homeassistant.update_entity
+                      service_data:
+                        entity_id: sensor.processor_use
+
+                  - entity: sensor.memory_use_percent
+                    name: Pamieć
+                    tap_action:
+                      action: call-service
+                      service: homeassistant.update_entity
+                      service_data:
+                        entity_id: sensor.memory_use_percent
+
+              - type: custom:hui-horizontal-stack-card
+                cards:
+                  - type: custom:button-card
+                    name: Home Assistant
+                    icon: mdi:reload
+                    tap_action:
+                      action: call-service
+                      service: homeassistant.restart
+                    template: icon_name
+
+                  - type: custom:button-card
+                    name: Theme
+                    icon: mdi:reload
+                    tap_action:
+                      action: call-service
+                      service: frontend.reload_themes
+                    template: icon_name
+

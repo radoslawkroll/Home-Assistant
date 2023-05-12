@@ -1,0 +1,333 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: Odkurzacz
+    timeout: 300000
+    style: |
+      --popup-max-width: calc(385px + 495px);
+      --primary-color: transparent; /* hide timeout progress */
+    card_mod:
+      style:
+        # card divider border
+        layout-card$grid-layout$: |
+          #root {
+            margin: -24px 0 !important;
+          }
+          hui-vertical-stack-card {
+            border-right: 1.5px solid rgba(0, 0, 0, 0.2);
+            border-radius: 0;
+            transition: none;
+          }
+          /* phone */
+          @media screen and (max-width: 800px) {
+            hui-vertical-stack-card {
+              border-right: none;
+              border-bottom: 1.5px solid rgba(0, 0, 0, 0.2);
+            }
+          }
+    content:
+      type: custom:layout-card
+      layout_type: custom:grid-layout
+      layout:
+        margin: 0
+        grid-template-columns: 385px 495px
+        grid-template-rows: 1fr
+        grid-template-areas: |
+          "info map"
+        mediaquery:
+          #phone
+          "(max-width: 800px)":
+            grid-template-columns: 1fr
+            grid-template-rows: repeat(2, 1fr)
+            grid-template-areas: |
+              "info"
+              "map"
+      cards:
+
+        ### ÖVERSIKT
+
+        - type: vertical-stack
+          view_layout:
+            grid-area: info
+          cards:
+          - type: entities
+            title: Podgląd
+            card_mod:
+              class: header
+              style: |
+                .card-content {
+                  padding: var(--tablet-popup-content-padding);
+                  padding-bottom: 0;
+                }
+            entities:
+
+            - entity: vacuum.dreame
+            - entity: sensor.dreame_cleaning_history
+              name: Ostatnie czyszczenie
+
+            - type: custom:bar-card
+              width: 55%
+              height: 2em
+              decimal: 0
+              unit_of_measurement: '%'
+              positions:
+                icon: outside
+                indicator: 'off'
+                name: outside
+              severity:
+                - color: '#303435'
+                  from: 11
+                  to: 999
+                - color: '#6d2525'
+                  from: 0
+                  to: 10
+              entity_row: true
+              entities:
+                - entity: sensor.dreame_battery_level
+                  name: Bateria
+                  icon: mdi:battery
+                - entity: sensor.dreame_p2029_fd42_filter_life_level
+                  name: Filtr
+                - entity: sensor.dreame_p2029_fd42_brush_life_level
+                  name: Szczotka główna
+                - entity: sensor.dreame_p2029_fd42_brush_life_level_2
+                  name: Szczotka boczna
+
+            - type: custom:more-info-card
+              entity: vacuum.dreame
+              card_mod:
+                style:
+                  # hide everything but ha-select
+                  $: |
+                    h1 {
+                      display: none !important;
+                    }
+                  .: |
+                    h1, state-card-content {
+                      display: none !important;
+                    }
+                    .card-content {
+                      padding: 1.5em 0 0 0.7em;
+                    }
+                  more-info-vacuum$:
+                    .: |
+                      div.flex-horizontal>div, div:nth-child(2), ha-attributes {
+                        display: none;
+                      }
+                      ha-select {
+                        display: contents;
+                      }
+                    ha-select:
+                      $:
+                        # no icon so remove label inset
+                        .: |
+                          .mdc-floating-label {
+                            inset-inline-start: 0 !important;
+                          }
+                        # fix transparent menu background color
+                        mwc-menu$: |
+                          mwc-list {
+                            background: var(--card-background-color);
+                          }
+
+          - type: custom:mod-card
+            card_mod:
+              style:
+                # horizontal bottom buttons
+                hui-horizontal-stack-card$: |
+                  #root {
+                    justify-content: space-evenly !important;
+                    padding: var(--tablet-popup-button-padding);
+                  }
+            card:
+              type: horizontal-stack
+              cards:
+                - type: custom:button-card
+                  entity: vacuum.dreame
+                  icon: mdi:play-pause
+                  tap_action:
+                    action: call-service
+                    service: >
+                      [[[
+                        return `[[[
+                          return entity.state === 'docked' || entity.state === 'paused'
+                            ? 'vacuum.start'
+                            : 'vacuum.pause';
+                        ]]]`
+                      ]]]
+                    service_data:
+                      entity_id: vacuum.dreame
+                  template: icon_only
+
+                - type: custom:button-card
+                  entity: vacuum.dreame
+                  icon: mdi:battery-charging
+                  tap_action:
+                    action: call-service
+                    service: vacuum.return_to_base
+                    service_data:
+                      entity_id: vacuum.dreame
+                  template: icon_only
+
+                - type: custom:button-card
+                  icon: mdi:delete-empty
+                  tap_action:
+                    action: call-service
+                    service: dreame_vacuum.vacuum_clean_spot
+                    service_data:
+                      entity_id: vacuum.dreame
+                      command: app_goto_target
+                      params: [-4331,-3155]
+                  template: icon_only
+
+        ### KARTLÄGGNING
+
+        - type: custom:xiaomi-vacuum-map-card
+          title: Mapa
+          view_layout:
+            grid-area: map
+          card_mod:
+            class: header
+            style: |
+              ha-card {
+                --map-card-primary-color: #FFFFFF10;
+                --map-card-secondary-color: none;
+                --map-card-secondary-text-color: #9da0a2;
+                --map-card-zoomer-background: none;
+                --map-card-predefined-rectangle-fill-color: none;
+                --map-card-predefined-rectangle-line-color: none;
+                --map-card-predefined-rectangle-line-color-selected: rgba(255, 255, 255, 0.5);
+                --map-card-predefined-rectangle-fill-color-selected: rgba(42, 124, 194, 0.1);
+                --map-card-predefined-rectangle-icon-background-color-selected: rgb(42, 124, 194);
+                --map-card-internal-big-radius: 0.6em !important;
+              }
+              div.map-wrapper, div.controls-wrapper {
+                padding: var(--tablet-popup-content-padding);
+                padding-top: 0;
+                padding-bottom: 0;
+                letter-spacing: normal;
+              }
+              div.tiles-wrapper, div.vacuum-controls, #map-zoomer-overlay {
+                display: none;
+              }
+              div.map-controls-wrapper {
+                padding-top: 24px;
+              }
+              paper-button {
+                --mdc-icon-size: 2em;
+                color: #9da0a2 !important;
+                padding: 0.42em;
+              }
+          language: pl
+          entity: vacuum.dreame
+          map_source:
+            camera: camera.xiaomi_cloud_map_extractor
+          calibration_source:
+            camera: true
+          map_modes:
+            - template: vacuum_clean_segment
+              repeats_type: EXTERNAL
+              max_repeats: 3
+              service_call_schema:
+                service: dreame_vacuum.vacuum_clean_segment
+                service_data:
+                  entity_id: '[[entity_id]]'
+                  segments: '[[selection]]'
+                  repeats: '[[repeats]]'
+              predefined_selections:
+                - id: 1
+                  icon:
+                    name: mdi:bed-king
+                    x: -7225
+                    'y': -2400
+                  label:
+                    text: Sypialnia
+                    x: -7225
+                    'y': -2400
+                    offset_y: 35
+                  outline:
+                    - - -8550
+                      - -4150
+                    - - -5900
+                      - -4150
+                    - - -5900
+                      - -650
+                    - - -8550
+                      - -650
+                - id: 2
+                  icon:
+                    name: mdi:television
+                    x: -975
+                    'y': -1875
+                  label:
+                    text: Salon
+                    x: -975
+                    'y': -1875
+                    offset_y: 35
+                  outline:
+                    - - -2600
+                      - -4300
+                    - - 650
+                      - -4300
+                    - - 650
+                      - 550
+                    - - -2600
+                      - 550
+                - id: 4
+                  icon:
+                    name: mdi:shoe-sneaker
+                    x: -4250
+                    'y': -775
+                  label:
+                    text: Przedpokój
+                    x: -4250
+                    'y': -775
+                    offset_y: 35
+                  outline:
+                    - - -5900
+                      - -2150
+                    - - -2600
+                      - -2150
+                    - - -2600
+                      - 600
+                    - - -5900
+                      - 600
+                - id: 5
+                  icon:
+                    name: mdi:silverware-fork-knife
+                    x: -4525
+                    'y': -3175
+                  label:
+                    text: Kuchnia
+                    x: -4525
+                    'y': -3175
+                    offset_y: 35
+                  outline:
+                    - - -5800
+                      - -4200
+                    - - -3250
+                      - -4200
+                    - - -3250
+                      - -2150
+                    - - -5800
+                      - -2150  
+            - name: Clean Spot
+              icon: mdi:map-marker-plus
+              max_repeats: 3
+              selection_type: MANUAL_POINT
+              repeats_type: EXTERNAL
+              service_call_schema:
+                service: dreame_vacuum.vacuum_clean_spot
+                service_data:
+                  entity_id: '[[entity_id]]'
+                  points: '[[selection]]'
+                  repeats: '[[repeats]]'
+          map_locked: true
+          title: Mapa                  
+
+
+
+
+
+

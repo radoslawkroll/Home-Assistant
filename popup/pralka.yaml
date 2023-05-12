@@ -1,0 +1,31 @@
+action: fire-dom-event
+browser_mod:
+  service: browser_mod.popup
+  data:
+    title: "Pralka"
+    content:
+      type: custom:mod-card
+      card_mod:
+        style:
+          .: |
+            :host .content {
+              width: 100%;
+            } 
+      card:
+        type: vertical-stack
+        cards:
+          - type: conditional
+            conditions:
+              - entity: binary_sensor.pralka
+                state: 'off'
+            card:
+              type: entities
+              entities:
+                - entity: switch.pralka
+          - type: entities
+            entities:
+              - entity: sensor.last_run_date_pralka
+                name: Ostatnie pranie
+                icon: mdi:washing-machine
+              - entity: sensor.zuzycie_energii_pralka
+                icon: mdi:currency-usd
