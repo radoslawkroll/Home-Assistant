@@ -1,5 +1,6 @@
 # Home-Assistant
-Hi welcome to my Github. The appearance and some configurations of my Home Assistant were taken from https://github.com/matt8707/hass-config and changed for my use.
+
+Here's my Home Assistant configuration, which was borrowed from https://github.com/matt8707/hass-config and adapted to my own needs. The installation method used is Home Assistant Container. It's important to note that while using pre-existing configurations from sources like GitHub can be helpful, it's always necessary to modify them to fit your specific requirements and preferences. Additionally, using containerization tools like Home Assistant Container can make the installation process smoother and more streamlined.
 
 # Hardware
 
