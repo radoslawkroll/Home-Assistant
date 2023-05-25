@@ -18,3 +18,12 @@ Here's my Home Assistant configuration, which was borrowed from https://github.c
 | Lights 2            | Xiaomi ZNLDP12LM                                      | https://www.zigbee2mqtt.io/devices/ZNLDP12LM.html                                                                                 |     
 | Lights 3            | IKEA ICPSHC24-30EU-IL-1                               | https://www.zigbee2mqtt.io/devices/ICPSHC24-30EU-IL-1.html                                                                        |
 | Air purifier        | XIAOMI MI Air Purifier PRO                            | https://www.zigbee2mqtt.io/devices/ICPSHC24-30EU-IL-1.html                                                                        |
+
+# Screenshot
+
+![image](https://github.com/radoslawkroll/Home-Assistant/assets/73444368/61f85d72-339c-4c95-bd07-9aa6ba80b39a)
+
+![image](https://github.com/radoslawkroll/Home-Assistant/assets/73444368/496acf82-d085-46b3-a5e3-b3e09e790ed5)
+
+![image](https://github.com/radoslawkroll/Home-Assistant/assets/73444368/167375d5-6620-4deb-99fa-06d48b9ee4d4)
+
