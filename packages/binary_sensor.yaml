@@ -1,17 +1,4 @@
-binary_sensor:
-
-  - platform: burze_dzis_net
-    api_key: 592027ae1bb562c0a1f1a727f8d1eb713bfee687
-    warnings:
-      - frost_warning
-      - heat_warning
-      - wind_warning
-      - precipitation_warning
-      - storm_warning
-      - tornado_warning
-    storms_nearby:
-      radius: 30
-      
+binary_sensor:      
   - platform: template
     sensors:
       pralka:
